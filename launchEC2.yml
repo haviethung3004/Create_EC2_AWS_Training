@@ -1,0 +1,15 @@
+---
+- name: Create an AMI from an existing EC2 instance
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Create an AMI from the EC2 instance
+      amazon.aws.ec2_ami:
+        name: MyCustomAMI                  # Replace with your desired AMI name
+        region: us-west-2                  # Replace with your desired AWS region
+        wait: yes                          # Wait for the AMI creation to complete
+        tags:                              # Optional: Tags for the AMI
+          Name: MyCustomAMI
+          Purpose: Backup
+      register: ami

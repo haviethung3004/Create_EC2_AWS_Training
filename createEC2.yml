@@ -1,0 +1,36 @@
+---
+- name: Launch a new EC2 instance
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: check existing EC2
+      amazon.aws.ec2_instance_info:
+        region: ap-southeast-1                   # Replace with your desired AWS region
+        filters:
+          "tag:Name": MyNewInstance    # Replace with the tag or name you're checking
+      register: ec2_infor
+
+    - name: Debug var of ec2_infor
+      debug:
+        var: ec2_infor
+
+    - name: Launch a new EC2 instance
+      amazon.aws.ec2_instance:
+        instance_type: t2.micro               # Replace with the desired instance type
+        image_id: ami-0a6b545f62129c495       # Replace with the desired AMI ID
+        region: ap-southeast-1                    # Replace with your desired AWS region
+        wait: yes
+        count: 1
+        tags:
+          Name: MyNewInstance
+      when: ec2_infor.instances | length == 0
+      register: ec2_instance
+
+
+
+    - name: Output instance ID and public IP
+      debug:
+        msg: "Launched EC2 Instance ID: {{ ec2_instance.instances[0].instance_id }}, Public IP: {{ ec2_instance.instances[0].network_interfaces[0].public_ip }}"
+

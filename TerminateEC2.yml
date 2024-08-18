@@ -1,0 +1,25 @@
+---
+- name: Terminate all EC2 instances in ap-southeast-1
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Gather all EC2 instances
+      amazon.aws.ec2_instance_info:
+        region: ap-southeast-1              # Region set to ap-southeast-1 (Singapore)
+      register: ec2_info
+
+    - name: Terminate all EC2 instances
+      amazon.aws.ec2_instance:
+        region: ap-southeast-1              # Region set to ap-southeast-1 (Singapore)
+        state: absent
+        instance_ids: "{{ item.instance_id }}"
+      with_items: "{{ ec2_info.instances }}"
+      when: ec2_info.instances | length > 0
+
+    - name: Output terminated instance IDs
+      debug:
+        msg: "Terminated EC2 Instance ID: {{ item.instance_id }}"
+      with_items: "{{ ec2_info.instances }}"
+      when: ec2_info.instances | length > 0
+
